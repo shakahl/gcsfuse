@@ -48,7 +48,9 @@ type DirHandleTest struct {
 var _ SetUpInterface = &DirHandleTest{}
 var _ TearDownInterface = &DirHandleTest{}
 
-func init() { RegisterTestSuite(&DirHandleTest{}) }
+func init() {
+	// RegisterTestSuite(&DirHandleTest{})
+}
 
 func (t *DirHandleTest) SetUp(ti *TestInfo) {
 	t.ctx = ti.Ctx

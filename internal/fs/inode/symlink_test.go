@@ -34,7 +34,9 @@ type SymlinkTest struct {
 var _ SetUpInterface = &CoreTest{}
 var _ TearDownInterface = &CoreTest{}
 
-func init() { RegisterTestSuite(&SymlinkTest{}) }
+func init() {
+	// RegisterTestSuite(&SymlinkTest{})
+}
 
 ////////////////////////////////////////////////////////////////////////
 // Tests

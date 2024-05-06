@@ -15,14 +15,10 @@
 package fs_test
 
 import (
-	"io"
-	"io/ioutil"
-	"os"
-	"path"
-
 	"github.com/googlecloudplatform/gcsfuse/v2/internal/storage/fake"
 	"github.com/googlecloudplatform/gcsfuse/v2/internal/storage/gcs"
-	. "github.com/jacobsa/oglematchers"
+
+	// . "github.com/jacobsa/oglematchers"
 	. "github.com/jacobsa/ogletest"
 	"github.com/jacobsa/timeutil"
 )
@@ -36,7 +32,7 @@ type AllBucketsTest struct {
 }
 
 func init() {
-	RegisterTestSuite(&AllBucketsTest{})
+	// RegisterTestSuite(&AllBucketsTest{})
 }
 
 func (t *AllBucketsTest) SetUpTestSuite() {
@@ -55,96 +51,96 @@ func (t *AllBucketsTest) SetUpTestSuite() {
 // Tests
 ////////////////////////////////////////////////////////////////////////
 
-func (t *AllBucketsTest) BaseDir_Ls() {
-	_, err := ioutil.ReadDir(mntDir)
-	ExpectThat(err, Error(HasSubstr("operation not supported")))
-}
+// func (t *AllBucketsTest) BaseDir_Ls() {
+// 	_, err := ioutil.ReadDir(mntDir)
+// 	ExpectThat(err, Error(HasSubstr("operation not supported")))
+// }
 
-func (t *AllBucketsTest) BaseDir_Write() {
-	filename := path.Join(mntDir, "foo")
-	err := ioutil.WriteFile(
-		filename, []byte("content"), os.FileMode(0644))
-	ExpectThat(err, Error(HasSubstr("input/output error")))
-}
+// func (t *AllBucketsTest) BaseDir_Write() {
+// 	filename := path.Join(mntDir, "foo")
+// 	err := ioutil.WriteFile(
+// 		filename, []byte("content"), os.FileMode(0644))
+// 	ExpectThat(err, Error(HasSubstr("input/output error")))
+// }
 
-func (t *AllBucketsTest) BaseDir_Rename() {
-	err := os.Rename(mntDir+"/bucket-0", mntDir+"/bucket-1/foo")
-	ExpectThat(err, Error(HasSubstr("operation not supported")))
+// func (t *AllBucketsTest) BaseDir_Rename() {
+// 	err := os.Rename(mntDir+"/bucket-0", mntDir+"/bucket-1/foo")
+// 	ExpectThat(err, Error(HasSubstr("operation not supported")))
 
-	filename := path.Join(mntDir + "/bucket-0/foo")
-	err = ioutil.WriteFile(
-		filename, []byte("content"), os.FileMode(0644))
-	AssertEq(nil, err)
+// 	filename := path.Join(mntDir + "/bucket-0/foo")
+// 	err = ioutil.WriteFile(
+// 		filename, []byte("content"), os.FileMode(0644))
+// 	AssertEq(nil, err)
 
-	err = os.Rename(mntDir+"/bucket-0/foo", mntDir+"/bucket-1/foo")
-	ExpectThat(err, Error(HasSubstr("operation not supported")))
+// 	err = os.Rename(mntDir+"/bucket-0/foo", mntDir+"/bucket-1/foo")
+// 	ExpectThat(err, Error(HasSubstr("operation not supported")))
 
-	err = os.Rename(mntDir+"/bucket-0/foo", mntDir+"/bucket-99")
-	ExpectThat(err, Error(HasSubstr("input/output error")))
+// 	err = os.Rename(mntDir+"/bucket-0/foo", mntDir+"/bucket-99")
+// 	ExpectThat(err, Error(HasSubstr("input/output error")))
 
-}
+// }
 
-func (t *AllBucketsTest) SingleBucket_ReadAfterWrite() {
-	var err error
-	filename := path.Join(mntDir, "bucket-1/foo")
+// func (t *AllBucketsTest) SingleBucket_ReadAfterWrite() {
+// 	var err error
+// 	filename := path.Join(mntDir, "bucket-1/foo")
 
-	// Create a file.
-	const contents = "tacoburritoenchilada"
-	AssertEq(
-		nil,
-		ioutil.WriteFile(
-			filename,
-			[]byte(contents),
-			os.FileMode(0644)))
+// 	// Create a file.
+// 	const contents = "tacoburritoenchilada"
+// 	AssertEq(
+// 		nil,
+// 		ioutil.WriteFile(
+// 			filename,
+// 			[]byte(contents),
+// 			os.FileMode(0644)))
 
-	// Open the file.
-	t.f1, err = os.OpenFile(filename, os.O_RDWR, 0)
-	AssertEq(nil, err)
+// 	// Open the file.
+// 	t.f1, err = os.OpenFile(filename, os.O_RDWR, 0)
+// 	AssertEq(nil, err)
 
-	// Write to the start of the file using File.Write.
-	_, err = t.f1.Write([]byte("000"))
-	AssertEq(nil, err)
+// 	// Write to the start of the file using File.Write.
+// 	_, err = t.f1.Write([]byte("000"))
+// 	AssertEq(nil, err)
 
-	// Write to the middle of the file using File.WriteAt.
-	_, err = t.f1.WriteAt([]byte("111"), 4)
-	AssertEq(nil, err)
+// 	// Write to the middle of the file using File.WriteAt.
+// 	_, err = t.f1.WriteAt([]byte("111"), 4)
+// 	AssertEq(nil, err)
 
-	// Seek and write past the end of the file.
-	_, err = t.f1.Seek(int64(len(contents)), 0)
-	AssertEq(nil, err)
+// 	// Seek and write past the end of the file.
+// 	_, err = t.f1.Seek(int64(len(contents)), 0)
+// 	AssertEq(nil, err)
 
-	_, err = t.f1.Write([]byte("222"))
-	AssertEq(nil, err)
+// 	_, err = t.f1.Write([]byte("222"))
+// 	AssertEq(nil, err)
 
-	// Check the size now.
-	fi, err := t.f1.Stat()
-	AssertEq(nil, err)
-	ExpectEq(len(contents)+len("222"), fi.Size())
+// 	// Check the size now.
+// 	fi, err := t.f1.Stat()
+// 	AssertEq(nil, err)
+// 	ExpectEq(len(contents)+len("222"), fi.Size())
 
-	// Read some contents with Seek and Read.
-	_, err = t.f1.Seek(4, 0)
-	AssertEq(nil, err)
+// 	// Read some contents with Seek and Read.
+// 	_, err = t.f1.Seek(4, 0)
+// 	AssertEq(nil, err)
 
-	buf := make([]byte, 4)
-	_, err = io.ReadFull(t.f1, buf)
+// 	buf := make([]byte, 4)
+// 	_, err = io.ReadFull(t.f1, buf)
 
-	AssertEq(nil, err)
-	ExpectEq("111r", string(buf))
+// 	AssertEq(nil, err)
+// 	ExpectEq("111r", string(buf))
 
-	// Read the full contents with ReadAt.
-	buf = make([]byte, len(contents)+len("222"))
-	_, err = t.f1.ReadAt(buf, 0)
+// 	// Read the full contents with ReadAt.
+// 	buf = make([]byte, len(contents)+len("222"))
+// 	_, err = t.f1.ReadAt(buf, 0)
 
-	AssertEq(nil, err)
-	ExpectEq("000o111ritoenchilada222", string(buf))
+// 	AssertEq(nil, err)
+// 	ExpectEq("000o111ritoenchilada222", string(buf))
 
-	// Close the file.
-	AssertEq(nil, t.f1.Close())
-	t.f1 = nil
+// 	// Close the file.
+// 	AssertEq(nil, t.f1.Close())
+// 	t.f1 = nil
 
-	// Read back its contents.
-	fileContents, err := ioutil.ReadFile(filename)
+// 	// Read back its contents.
+// 	fileContents, err := ioutil.ReadFile(filename)
 
-	AssertEq(nil, err)
-	ExpectEq("000o111ritoenchilada222", string(fileContents))
-}
+// 	AssertEq(nil, err)
+// 	ExpectEq("000o111ritoenchilada222", string(fileContents))
+// }

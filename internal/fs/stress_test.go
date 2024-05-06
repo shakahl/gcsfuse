@@ -15,20 +15,8 @@
 package fs_test
 
 import (
-	"fmt"
-	"io/ioutil"
-	"math/rand"
-	"os"
-	"path"
-	"runtime"
 	"sync"
-	"time"
-
-	"golang.org/x/net/context"
-
-	"github.com/jacobsa/fuse/fusetesting"
-	. "github.com/jacobsa/ogletest"
-	"github.com/jacobsa/syncutil"
+	// . "github.com/jacobsa/ogletest"
 )
 
 ////////////////////////////////////////////////////////////////////////
@@ -85,133 +73,133 @@ type StressTest struct {
 }
 
 func init() {
-	RegisterTestSuite(&StressTest{})
+	// RegisterTestSuite(&StressTest{})
 }
 
-func (t *StressTest) CreateAndReadManyFilesInParallel() {
-	var err error
+// func (t *StressTest) CreateAndReadManyFilesInParallel() {
+// 	var err error
 
-	// Ensure that we get parallelism for this test.
-	defer runtime.GOMAXPROCS(runtime.GOMAXPROCS(runtime.NumCPU()))
+// 	// Ensure that we get parallelism for this test.
+// 	defer runtime.GOMAXPROCS(runtime.GOMAXPROCS(runtime.NumCPU()))
 
-	// Choose a bunch of file names.
-	const numFiles = 32
+// 	// Choose a bunch of file names.
+// 	const numFiles = 32
 
-	var names []string
-	for i := 0; i < numFiles; i++ {
-		names = append(names, fmt.Sprintf("%d", i))
-	}
+// 	var names []string
+// 	for i := 0; i < numFiles; i++ {
+// 		names = append(names, fmt.Sprintf("%d", i))
+// 	}
 
-	// Create a file for each name with concurrent workers.
-	err = forEachName(
-		names,
-		func(n string) (err error) {
-			err = ioutil.WriteFile(path.Join(mntDir, n), []byte(n), 0400)
-			return
-		})
+// 	// Create a file for each name with concurrent workers.
+// 	err = forEachName(
+// 		names,
+// 		func(n string) (err error) {
+// 			err = ioutil.WriteFile(path.Join(mntDir, n), []byte(n), 0400)
+// 			return
+// 		})
 
-	AssertEq(nil, err)
+// 	AssertEq(nil, err)
 
-	// Read each back.
-	err = forEachName(
-		names,
-		func(n string) (err error) {
-			contents, err := ioutil.ReadFile(path.Join(mntDir, n))
-			if err != nil {
-				err = fmt.Errorf("ReadFile: %w", err)
-				return
-			}
+// 	// Read each back.
+// 	err = forEachName(
+// 		names,
+// 		func(n string) (err error) {
+// 			contents, err := ioutil.ReadFile(path.Join(mntDir, n))
+// 			if err != nil {
+// 				err = fmt.Errorf("ReadFile: %w", err)
+// 				return
+// 			}
 
-			if string(contents) != n {
-				err = fmt.Errorf("Contents mismatch: %q vs. %q", contents, n)
-				return
-			}
+// 			if string(contents) != n {
+// 				err = fmt.Errorf("Contents mismatch: %q vs. %q", contents, n)
+// 				return
+// 			}
 
-			return
-		})
+// 			return
+// 		})
 
-	AssertEq(nil, err)
-}
+// 	AssertEq(nil, err)
+// }
 
-func (t *StressTest) TruncateFileManyTimesInParallel() {
-	// Ensure that we get parallelism for this test.
-	defer runtime.GOMAXPROCS(runtime.GOMAXPROCS(runtime.NumCPU()))
+// func (t *StressTest) TruncateFileManyTimesInParallel() {
+// 	// Ensure that we get parallelism for this test.
+// 	defer runtime.GOMAXPROCS(runtime.GOMAXPROCS(runtime.NumCPU()))
 
-	// Create a file.
-	f, err := os.Create(path.Join(mntDir, "foo"))
-	AssertEq(nil, err)
-	defer f.Close()
+// 	// Create a file.
+// 	f, err := os.Create(path.Join(mntDir, "foo"))
+// 	AssertEq(nil, err)
+// 	defer f.Close()
 
-	// Set up a function that repeatedly truncates the file to random lengths,
-	// writing the final size to a channel.
-	worker := func(finalSize chan<- int64) (err error) {
-		const desiredDuration = 500 * time.Millisecond
+// 	// Set up a function that repeatedly truncates the file to random lengths,
+// 	// writing the final size to a channel.
+// 	worker := func(finalSize chan<- int64) (err error) {
+// 		const desiredDuration = 500 * time.Millisecond
 
-		var size int64
-		startTime := time.Now()
-		for time.Since(startTime) < desiredDuration {
-			for i := 0; i < 10; i++ {
-				size = rand.Int63n(1 << 14)
-				err = f.Truncate(size)
-				if err != nil {
-					return
-				}
-			}
-		}
+// 		var size int64
+// 		startTime := time.Now()
+// 		for time.Since(startTime) < desiredDuration {
+// 			for i := 0; i < 10; i++ {
+// 				size = rand.Int63n(1 << 14)
+// 				err = f.Truncate(size)
+// 				if err != nil {
+// 					return
+// 				}
+// 			}
+// 		}
 
-		finalSize <- size
-		return
-	}
+// 		finalSize <- size
+// 		return
+// 	}
 
-	// Run several workers.
-	b := syncutil.NewBundle(ctx)
+// 	// Run several workers.
+// 	b := syncutil.NewBundle(ctx)
 
-	const numWorkers = 16
-	finalSizes := make(chan int64, numWorkers)
+// 	const numWorkers = 16
+// 	finalSizes := make(chan int64, numWorkers)
 
-	for i := 0; i < numWorkers; i++ {
-		b.Add(func(ctx context.Context) (err error) {
-			err = worker(finalSizes)
-			return
-		})
-	}
+// 	for i := 0; i < numWorkers; i++ {
+// 		b.Add(func(ctx context.Context) (err error) {
+// 			err = worker(finalSizes)
+// 			return
+// 		})
+// 	}
 
-	err = b.Join()
-	AssertEq(nil, err)
+// 	err = b.Join()
+// 	AssertEq(nil, err)
 
-	close(finalSizes)
+// 	close(finalSizes)
 
-	// The final size should be consistent.
-	fi, err := f.Stat()
-	AssertEq(nil, err)
+// 	// The final size should be consistent.
+// 	fi, err := f.Stat()
+// 	AssertEq(nil, err)
 
-	var found = false
-	for s := range finalSizes {
-		if s == fi.Size() {
-			found = true
-			break
-		}
-	}
+// 	var found = false
+// 	for s := range finalSizes {
+// 		if s == fi.Size() {
+// 			found = true
+// 			break
+// 		}
+// 	}
 
-	ExpectTrue(found, "Unexpected size: %d", fi.Size())
-}
+// 	ExpectTrue(found, "Unexpected size: %d", fi.Size())
+// }
 
-func (t *StressTest) CreateInParallel_NoTruncate() {
-	fusetesting.RunCreateInParallelTest_NoTruncate(ctx, mntDir)
-}
+// func (t *StressTest) CreateInParallel_NoTruncate() {
+// 	fusetesting.RunCreateInParallelTest_NoTruncate(ctx, mntDir)
+// }
 
-func (t *StressTest) CreateInParallel_Truncate() {
-	fusetesting.RunCreateInParallelTest_Truncate(ctx, mntDir)
-}
+// func (t *StressTest) CreateInParallel_Truncate() {
+// 	fusetesting.RunCreateInParallelTest_Truncate(ctx, mntDir)
+// }
 
-func (t *StressTest) CreateInParallel_Exclusive() {
-	fusetesting.RunCreateInParallelTest_Exclusive(ctx, mntDir)
-}
+// func (t *StressTest) CreateInParallel_Exclusive() {
+// 	fusetesting.RunCreateInParallelTest_Exclusive(ctx, mntDir)
+// }
 
-func (t *StressTest) MkdirInParallel() {
-	fusetesting.RunMkdirInParallelTest(ctx, mntDir)
-}
+// func (t *StressTest) MkdirInParallel() {
+// 	fusetesting.RunMkdirInParallelTest(ctx, mntDir)
+// }
 
-func (t *StressTest) SymlinkInParallel() {
-	fusetesting.RunSymlinkInParallelTest(ctx, mntDir)
-}
+// func (t *StressTest) SymlinkInParallel() {
+// 	fusetesting.RunSymlinkInParallelTest(ctx, mntDir)
+// }

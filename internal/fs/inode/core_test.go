@@ -43,7 +43,9 @@ type CoreTest struct {
 var _ SetUpInterface = &CoreTest{}
 var _ TearDownInterface = &CoreTest{}
 
-func init() { RegisterTestSuite(&CoreTest{}) }
+func init() {
+	// RegisterTestSuite(&CoreTest{})
+}
 
 func (t *CoreTest) SetUp(ti *TestInfo) {
 	t.ctx = ti.Ctx

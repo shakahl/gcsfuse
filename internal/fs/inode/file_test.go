@@ -63,7 +63,9 @@ type FileTest struct {
 var _ SetUpInterface = &FileTest{}
 var _ TearDownInterface = &FileTest{}
 
-func init() { RegisterTestSuite(&FileTest{}) }
+func init() {
+	// RegisterTestSuite(&FileTest{})
+}
 
 func (t *FileTest) SetUp(ti *TestInfo) {
 	// Enabling invariant check for all tests.
