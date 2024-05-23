@@ -20,8 +20,6 @@ import (
 	"path"
 	"testing"
 
-	"cloud.google.com/go/compute/metadata"
-
 	"github.com/googlecloudplatform/gcsfuse/v2/tools/integration_tests/util/mounting"
 	"github.com/googlecloudplatform/gcsfuse/v2/tools/integration_tests/util/setup"
 )
@@ -101,11 +99,12 @@ func executeTestsForDynamicMounting(flags [][]string, m *testing.M) (successCode
 }
 
 func CreateTestBucketForDynamicMounting() (bucketName string) {
-	project_id, err := metadata.ProjectID()
-	if err != nil {
-		log.Printf("Error in fetching project id: %v", err)
-	}
+	//project_id, err := metadata.ProjectID()
+	//if err != nil {
+	//	log.Printf("Error in fetching project id: %v", err)
+	//}
 
+	project_id := "tpczero-system:gcsfuse-test-project"
 	// Create bucket with name gcsfuse-dynamic-mounting-test-xxxxx
 	setup.RunScriptForTestData("../util/mounting/dynamic_mounting/testdata/create_bucket.sh", testBucketForDynamicMounting, project_id)
 
