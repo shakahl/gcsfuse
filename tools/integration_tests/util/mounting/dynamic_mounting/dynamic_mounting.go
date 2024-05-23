@@ -110,7 +110,7 @@ func CreateTestBucketForDynamicMounting() (bucketName string) {
 	var err error
 
 	if setup.TestOnTPCEndPoint() {
-		project_id = "gcsfuse-test-project"
+		project_id = "tpczero-system:gcsfuse-test-project"
 		location = "u-us-prp1"
 	} else {
 		project_id, err = metadata.ProjectID()
