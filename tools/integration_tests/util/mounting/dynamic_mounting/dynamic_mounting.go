@@ -20,6 +20,8 @@ import (
 	"path"
 	"testing"
 
+	"cloud.google.com/go/compute/metadata"
+
 	"github.com/googlecloudplatform/gcsfuse/v2/tools/integration_tests/util/mounting"
 	"github.com/googlecloudplatform/gcsfuse/v2/tools/integration_tests/util/setup"
 )
@@ -31,14 +33,19 @@ const PrefixBucketForDynamicMountingTest = "golang-grpc-test-gcsfuse-dynamic-mou
 var testBucketForDynamicMounting = PrefixBucketForDynamicMountingTest + setup.GenerateRandomString(5)
 
 func MountGcsfuseWithDynamicMounting(flags []string) (err error) {
-	defaultArg := []string{"--debug_gcs",
+	var defaultArg []string
+	if setup.TestOnTPCEndPoint() {
+		defaultArg = append(defaultArg, "--custom-endpoint=storage.apis-tpczero.goog:443",
+			"--key-file=/home/tulsishah_google_com/kay.json")
+	}
+	defaultArg = append(defaultArg, "--debug_gcs",
 		"--debug_fs",
 		"--debug_fuse",
-		"--log-file=" + setup.LogFile(),
+		"--log-file="+setup.LogFile(),
 		"--log-format=text",
 		"--custom-endpoint=storage.apis-tpczero.goog:443",
 		"--key-file=/home/tulsishah_google_com/kay.json",
-		setup.MntDir()}
+		setup.MntDir())
 
 	for i := 0; i < len(defaultArg); i++ {
 		flags = append(flags, defaultArg[i])
@@ -99,14 +106,22 @@ func executeTestsForDynamicMounting(flags [][]string, m *testing.M) (successCode
 }
 
 func CreateTestBucketForDynamicMounting() (bucketName string) {
-	//project_id, err := metadata.ProjectID()
-	//if err != nil {
-	//	log.Printf("Error in fetching project id: %v", err)
-	//}
+	var project_id, location string
+	var err error
 
-	project_id := "tpczero-system:gcsfuse-test-project"
+	if setup.TestOnTPCEndPoint() {
+		project_id = "gcsfuse-test-project"
+		location = "u-us-prp1"
+	} else {
+		project_id, err = metadata.ProjectID()
+		if err != nil {
+			log.Printf("Error in fetching project id: %v", err)
+		}
+		location = "us-west1"
+	}
+
 	// Create bucket with name gcsfuse-dynamic-mounting-test-xxxxx
-	setup.RunScriptForTestData("../util/mounting/dynamic_mounting/testdata/create_bucket.sh", testBucketForDynamicMounting, project_id)
+	setup.RunScriptForTestData("../util/mounting/dynamic_mounting/testdata/create_bucket.sh", testBucketForDynamicMounting, project_id, location)
 
 	return testBucketForDynamicMounting
 }
