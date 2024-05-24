@@ -36,7 +36,7 @@ func MountGcsfuseWithDynamicMounting(flags []string) (err error) {
 	var defaultArg []string
 	if setup.TestOnTPCEndPoint() {
 		defaultArg = append(defaultArg, "--custom-endpoint=storage.apis-tpczero.goog:443",
-			"--key-file=/home/tulsishah_google_com/kay.json")
+			"--key-file=/tmp/sa.key.json")
 	}
 	defaultArg = append(defaultArg, "--debug_gcs",
 		"--debug_fs",
