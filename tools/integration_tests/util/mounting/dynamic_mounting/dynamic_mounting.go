@@ -44,7 +44,7 @@ func MountGcsfuseWithDynamicMounting(flags []string) (err error) {
 		"--log-file="+setup.LogFile(),
 		"--log-format=text",
 		"--custom-endpoint=storage.apis-tpczero.goog:443",
-		"--key-file=/home/tulsishah_google_com/kay.json",
+		"--key-file=/tmp/sa.key.json",
 		setup.MntDir())
 
 	for i := 0; i < len(defaultArg); i++ {
