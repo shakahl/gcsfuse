@@ -361,12 +361,7 @@ func SetupTestDirectory(testDirName string) string {
 
 // CleanupDirectoryOnGCS cleans up the object/directory path passed in parameter.
 func CleanupDirectoryOnGCS(directoryPathOnGCS string) {
-	command := "storage rm -r "
-	if TestOnTPCEndPoint() {
-		// rm -r through database locked error in TPC environment.
-		command = "storage rm"
-	}
-	_, err := operations.ExecuteGcloudCommandf(command, "gs://%s", directoryPathOnGCS)
+	_, err := operations.ExecuteGcloudCommandf("storage rm -r gs://%s", directoryPathOnGCS)
 	if err != nil {
 		log.Printf("Error while cleaning up directory %s from GCS: %v",
 			directoryPathOnGCS, err)
