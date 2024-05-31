@@ -108,6 +108,7 @@ func CreateTestBucketForDynamicMounting() (bucketName string) {
 	var err error
 
 	if setup.TestOnTPCEndPoint() {
+		// Set TPC project and location create bucket.
 		project_id = "tpczero-system:gcsfuse-test-project"
 		location = "u-us-prp1"
 	} else {
@@ -115,7 +116,9 @@ func CreateTestBucketForDynamicMounting() (bucketName string) {
 		if err != nil {
 			log.Printf("Error in fetching project id: %v", err)
 		}
-		location = "us-west1"
+		// We are creating a bucket in the us-central1 location because our continuous
+		// end-to-end tests are running from a VM in the us-central1 region.
+		location = "us-central1"
 	}
 
 	// Create bucket with name gcsfuse-dynamic-mounting-test-xxxxx
