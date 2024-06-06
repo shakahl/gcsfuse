@@ -163,6 +163,7 @@ func Errorf(format string, v ...interface{}) {
 func Fatal(format string, v ...interface{}) {
 	Errorf(format, v...)
 	Errorf(string(debug.Stack()))
+	_ = FlushLogger()
 	os.Exit(1)
 }
 
